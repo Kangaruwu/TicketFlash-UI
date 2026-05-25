@@ -1,5 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 @import 'tailwindcss';
+
+:root {
+  --bg: #ffffff;
+  --bg-warm: #f7f4ed;
+  --bg-soft: #faf8f3;
+  --ink: #0c0c0a;
+  --ink-2: #2a2a28;
+  --muted: #6e6b62;
+  --line: #e8e3d8;
+  --accent: #e5392f;
+  --accent-ink: #b82a22;
+
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
 * {
   box-sizing: border-box;
@@ -12,15 +28,111 @@ body {
 }
 
 body {
-  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(circle at 8% 10%, rgba(0, 109, 119, 0.18), transparent 38%),
-    radial-gradient(circle at 90% 0%, rgba(255, 183, 3, 0.2), transparent 35%),
-    linear-gradient(145deg, #f5f8ff 0%, #eef4ff 48%, #e8f8f7 100%);
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: #0c0c0a;
+}
+
+a {
+  color: inherit;
 }
 
 code,
 pre {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-family: var(--font-mono);
+}
+
+.tf-container {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.tf-display {
+  font-family: var(--font-display);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.tf-eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.tf-italic {
+  font-style: italic;
+}
+
+.tf-btn {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tf-btn-ink {
+  background: var(--ink);
+  color: #fff;
+}
+
+.tf-btn-ghost {
+  background: #fff;
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+
+.tf-btn-sm {
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.tf-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.tf-card-hover {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.tf-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink-2);
+}
+
+.tf-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.tf-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+@media (max-width: 640px) {
+  .tf-container {
+    padding: 0 20px;
+  }
 }
 

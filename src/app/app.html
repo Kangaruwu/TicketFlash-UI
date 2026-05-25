@@ -1,232 +1,99 @@
-<main class="shell">
-  <header class="hero card">
-    <div>
-      <p class="eyebrow">TicketFlash Console</p>
-      <h1>Minimal Angular UI for backend flow</h1>
-      <p class="subtitle">
-        Signal-driven dashboard: register/login, event browse, booking, payment,
-        QR retrieval, and admin check-in.
-      </p>
-    </div>
-    <div class="actions">
-      <button class="ghost" (click)="loadEvents()" [disabled]="isLoading()">
-        Reload Events
-      </button>
-    </div>
-  </header>
+<div class="tf-shell">
+  <nav class="tf-nav">
+    <div class="tf-container tf-nav-inner">
+      <div class="tf-logo" routerLink="/browse">TicketFlash</div>
 
-  <section class="status card">
-    <span class="dot" [class.loading]="isLoading()"></span>
-    <strong>Status</strong>
-    <p>{{ status() }}</p>
-  </section>
-
-  <section class="grid-2">
-    <article class="card">
-      <h2>User Session (ROLE_USER)</h2>
-
-      <div class="group">
-        <h3>Register User</h3>
-        <div class="fields">
-          <input placeholder="username" [(ngModel)]="userRegister.username" />
-          <input placeholder="email" [(ngModel)]="userRegister.email" />
-          <input placeholder="full name" [(ngModel)]="userRegister.fullName" />
-          <input
-            type="password"
-            placeholder="password"
-            [(ngModel)]="userRegister.password"
-          />
+      @if (showUserNav()) {
+        <div class="tf-nav-links">
+          <a routerLink="/browse" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Browse</a>
+          <a (click)="goUserCategory('Concert')">Concerts</a>
+          <a (click)="goUserCategory('Sports')">Sports</a>
+          <a (click)="goUserCategory('Theater')">Theater</a>
+          <a routerLink="/my-bookings" routerLinkActive="is-active">My tickets</a>
         </div>
-        <button (click)="registerUser()" [disabled]="isLoading()">Register User</button>
-      </div>
-
-      <div class="group">
-        <h3>Login User</h3>
-        <div class="fields">
-          <input
-            placeholder="username or email"
-            [(ngModel)]="userLogin.usernameOrEmail"
-          />
-          <input
-            type="password"
-            placeholder="password"
-            [(ngModel)]="userLogin.password"
-          />
-        </div>
-        <div class="row">
-          <button (click)="loginUser()" [disabled]="isLoading()">Login User</button>
-          <button class="ghost" (click)="logoutUser()">Logout</button>
-        </div>
-      </div>
-
-      @if (userSession(); as session) {
-        <p class="session-ok">Logged in as {{ session.email }} ({{ session.role }})</p>
       } @else {
-        <p class="session-miss">No user session.</p>
+        <div class="tf-nav-links">
+          <a routerLink="/admin" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+          <a routerLink="/admin/events" routerLinkActive="is-active">Events</a>
+          <a routerLink="/admin/bookings" routerLinkActive="is-active">Bookings</a>
+          <a routerLink="/admin/venues" routerLinkActive="is-active">Venues</a>
+        </div>
       }
-    </article>
 
-    <article class="card">
-      <h2>Admin Session (ROLE_ADMIN)</h2>
+      <div class="tf-nav-right">
+        @if (showUserNav()) {
+          <div class="tf-nav-search">
+            <input
+              [ngModel]="store.query()"
+              (ngModelChange)="store.setQuery($event)"
+              placeholder="Search events, artists, venues..." />
+          </div>
+        }
 
-      <div class="group">
-        <h3>Register Admin</h3>
-        <div class="fields">
-          <input placeholder="username" [(ngModel)]="adminRegister.username" />
-          <input placeholder="email" [(ngModel)]="adminRegister.email" />
-          <input placeholder="full name" [(ngModel)]="adminRegister.fullName" />
-          <input
-            type="password"
-            placeholder="password"
-            [(ngModel)]="adminRegister.password"
-          />
+        <div class="tf-role-switch">
+          <button [class.is-active]="store.role() === 'user'" (click)="switchRole('user')">User</button>
+          <button [class.is-active]="store.role() === 'admin'" (click)="switchRole('admin')">Admin</button>
         </div>
-        <button (click)="registerAdmin()" [disabled]="isLoading()">Register Admin</button>
-      </div>
 
-      <div class="group">
-        <h3>Login Admin</h3>
-        <div class="fields">
-          <input
-            placeholder="username or email"
-            [(ngModel)]="adminLogin.usernameOrEmail"
-          />
-          <input
-            type="password"
-            placeholder="password"
-            [(ngModel)]="adminLogin.password"
-          />
-        </div>
-        <div class="row">
-          <button (click)="loginAdmin()" [disabled]="isLoading()">Login Admin</button>
-          <button class="ghost" (click)="logoutAdmin()">Logout</button>
-        </div>
-      </div>
+        @if (!store.session()) {
+          <div class="tf-auth">
+            <div class="tf-auth-mode">
+              <button [class.is-active]="authMode === 'login'" (click)="switchAuthMode('login')">Login</button>
+              <button [class.is-active]="authMode === 'register'" (click)="switchAuthMode('register')">Register</button>
+            </div>
 
-      @if (adminSession(); as session) {
-        <p class="session-ok">Logged in as {{ session.email }} ({{ session.role }})</p>
-      } @else {
-        <p class="session-miss">No admin session.</p>
-      }
-    </article>
-  </section>
-
-  <section class="grid-2">
-    <article class="card">
-      <h2>Event and Booking</h2>
-
-      <div class="group">
-        <label>Event</label>
-        <select [value]="selectedEventId() ?? ''" (change)="onEventChange($any($event.target).value)">
-          <option value="" disabled>Select event</option>
-          @for (event of events(); track event.id) {
-            <option [value]="event.id">
-              {{ event.name }} ({{ event.status }})
-            </option>
-          }
-        </select>
-      </div>
-
-      <div class="group">
-        <label>Ticket Class</label>
-        <select [value]="selectedTicketId() ?? ''" (change)="onTicketChange($any($event.target).value)">
-          <option value="" disabled>Select ticket</option>
-          @if (selectedEvent(); as event) {
-            @for (ticket of event.ticketClasses; track ticket.id) {
-              <option [value]="ticket.id">
-                {{ ticket.name }} - available {{ ticket.quantityAvailable }}
-              </option>
+            @if (authMode === 'login') {
+              <input
+                [(ngModel)]="auth.usernameOrEmail"
+                placeholder="username/email"
+                autocomplete="username" />
+              <input
+                [(ngModel)]="auth.password"
+                type="password"
+                placeholder="password"
+                autocomplete="current-password" />
+              <button class="tf-btn tf-btn-ink tf-btn-sm" (click)="login()" [disabled]="store.isLoading()">Login</button>
+            } @else {
+              <input
+                [(ngModel)]="registerForm.username"
+                placeholder="username"
+                autocomplete="username" />
+              <input
+                [(ngModel)]="registerForm.email"
+                placeholder="email"
+                autocomplete="email" />
+              <input
+                [(ngModel)]="registerForm.fullName"
+                placeholder="full name"
+                autocomplete="name" />
+              <input
+                [(ngModel)]="registerForm.password"
+                type="password"
+                placeholder="password"
+                autocomplete="new-password" />
+              <label class="tf-admin-check">
+                <input type="checkbox" [(ngModel)]="registerForm.asAdmin" /> Admin
+              </label>
+              <button class="tf-btn tf-btn-ink tf-btn-sm" (click)="register()" [disabled]="store.isLoading()">
+                Register {{ registerForm.asAdmin ? 'Admin' : 'User' }}
+              </button>
             }
-          }
-        </select>
-      </div>
+          </div>
+        } @else {
+          <div class="tf-session">
+            <span>{{ store.session()?.email }}</span>
+            <button class="tf-btn tf-btn-ghost tf-btn-sm" (click)="logout()">Logout</button>
+          </div>
+        }
 
-      @if (selectedTicket(); as ticket) {
-        <p class="ticket-note">
-          Price: {{ ticket.price }} | Available: {{ ticket.quantityAvailable }}
-        </p>
-      }
-
-      <div class="group">
-        <label>Quantity</label>
-        <input
-          type="number"
-          min="1"
-          [ngModel]="bookingQuantity()"
-          (ngModelChange)="bookingQuantity.set($event)"
-        />
-      </div>
-
-      <div class="row">
-        <button (click)="createBooking()" [disabled]="isLoading()">Create Booking</button>
-        <button class="ghost" (click)="loadMyBookings()" [disabled]="isLoading()">
-          Load My Bookings
-        </button>
-      </div>
-    </article>
-
-    <article class="card">
-      <h2>Booking Actions</h2>
-
-      <div class="group">
-        <label>Booking ID</label>
-        <input
-          [ngModel]="selectedBookingId()"
-          (ngModelChange)="selectedBookingId.set($event)"
-          placeholder="UUID"
-        />
-      </div>
-
-      <div class="row">
-        <button (click)="payBooking()" [disabled]="isLoading()">Pay Booking</button>
-        <button (click)="fetchQr()" [disabled]="isLoading()">Get QR PNG</button>
-      </div>
-
-      @if (qrPreviewUrl()) {
-        <div class="qr-box">
-          <img [src]="qrPreviewUrl()" alt="Booking QR" />
-        </div>
-      }
-
-      <div class="group">
-        <label>Check-in Booking ID</label>
-        <input
-          [ngModel]="checkInBookingId()"
-          (ngModelChange)="checkInBookingId.set($event)"
-          placeholder="UUID"
-        />
-      </div>
-
-      <div class="group">
-        <label>Check-in QR Token</label>
-        <input
-          [ngModel]="checkInQrToken()"
-          (ngModelChange)="checkInQrToken.set($event)"
-          placeholder="UUID"
-        />
-      </div>
-
-      <button class="danger" (click)="checkIn()" [disabled]="isLoading()">
-        Check-in (Admin)
-      </button>
-    </article>
-  </section>
-
-  <section class="card">
-    <h2>My Bookings</h2>
-    @if (bookings().length === 0) {
-      <p class="session-miss">No bookings loaded.</p>
-    } @else {
-      <div class="booking-list">
-        @for (booking of bookings(); track booking.id) {
-          <button class="booking" (click)="pickBooking(booking.id)">
-            <strong>{{ booking.id }}</strong>
-            <span>{{ booking.eventName }}</span>
-            <span>Status: {{ booking.status }}</span>
-            <span>Tickets: {{ booking.totalTicket }}</span>
-          </button>
+        @if (showUserNav()) {
+          <a class="tf-cart" routerLink="/cart">Cart {{ store.cartCount() }}</a>
         }
       </div>
-    }
-  </section>
-</main>
+    </div>
+  </nav>
+
+  <div class="tf-status">{{ store.status() }}</div>
+
+  <router-outlet />
+</div>
